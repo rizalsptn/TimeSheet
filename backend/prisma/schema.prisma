@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model logins {
+  id            Int     @id @default(autoincrement()) @db.UnsignedInt
+  user_id       Int     @db.UnsignedInt
+  token         String  @db.Text
+  refresh_token String  @db.Text
+  user_agent    String? @db.VarChar(255)
+  users         users   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "logins_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model tags {
+  id          Int         @id @default(autoincrement()) @db.UnsignedInt
+  name        String      @unique(map: "name") @db.VarChar(125)
+  description String?     @db.Text
+  task_tags   task_tags[]
+}
+
+model task_tags {
+  id      Int   @id @default(autoincrement()) @db.UnsignedInt
+  task_id Int   @db.UnsignedInt
+  tag_id  Int   @db.UnsignedInt
+  tasks   tasks @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "task_tags_ibfk_1")
+  tags    tags  @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "task_tags_ibfk_2")
+
+  @@unique([task_id, tag_id], map: "task_id")
+  @@index([tag_id], map: "tag_id")
+}
+
+model tasks {
+  id          Int         @id @default(autoincrement()) @db.UnsignedInt
+  user_id     Int         @db.UnsignedInt
+  name        String      @db.VarChar(255)
+  task_date   DateTime    @db.Date
+  from_time   DateTime    @db.Time(0)
+  until_time  DateTime    @db.Time(0)
+  description String?     @db.Text
+  created     DateTime?   @default(now()) @db.DateTime(0)
+  modified    DateTime?   @default(now()) @db.DateTime(0)
+  task_tags   task_tags[]
+  users       users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "tasks_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  id       Int      @id @default(autoincrement()) @db.UnsignedInt
+  name     String   @db.VarChar(255)
+  username String   @unique(map: "username") @db.VarChar(255)
+  password String   @db.VarChar(255)
+  logins   logins[]
+  tasks    tasks[]
+}
