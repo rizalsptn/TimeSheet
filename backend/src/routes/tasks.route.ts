@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { getAllTasks, getSingleTask, addTask, modifyTask, removeTask } from "../controllers/tasks.controller";
 
-export const taskRoutes = new Elysia()
+export const taskRoutes: Elysia = new Elysia()
   .get("/tasks", getAllTasks)
   .get("/tasks/:id", getSingleTask)
   .post("/tasks", addTask)
