@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET!;
 const REFRESH_SECRET = process.env.REFRESH_SECRET!;
+const isSecure = process.env.NODE_ENV === "production" || process.env.COOKIE_SECURE === "true";
 
 export const registerController = async ({ request, set }: any) => {
     let data;
@@ -41,13 +42,14 @@ export const registerController = async ({ request, set }: any) => {
     });
 
     // ✅ Simpan refresh token di HTTP-only cookie
-    set.headers["Set-Cookie"] = `refreshToken=${refreshToken}; HttpOnly; Secure; Path=/; Max-Age=${7 * 24 * 60 * 60}`;
+    set.headers["Set-Cookie"] = `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}`;
 
     return { accessToken, message: "Registration successful" };
 };
 
 
 export const loginController = async ({ request, set }: any) => {
+
     let data;
     try {
         data = await request.json();
@@ -81,10 +83,14 @@ export const loginController = async ({ request, set }: any) => {
         },
     });
 
-    // ✅ Simpan refresh token di HTTP-only cookie
-    set.headers["Set-Cookie"] = `refreshToken=${refreshToken}; HttpOnly; Secure; Path=/; Max-Age=${7 * 24 * 60 * 60}`;
 
-    return { accessToken, message: "Login successful" };
+
+    set.headers["Set-Cookie"] = `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure=${isSecure}`;
+
+
+      
+
+    return { accessToken, message: "Login successful", userId: user.id, userName: user.username };
 };
 
 export const refreshTokenController = async ({ request, set }: any) => {
@@ -120,16 +126,22 @@ export const refreshTokenController = async ({ request, set }: any) => {
     }
 };
 
-export const logoutController = async ({ request, cookie, setCookie }: any) => {
-    const refreshToken = cookie.refreshToken;
+export const logoutController = async ({ cookie, set }: any) => {
+
+    const refreshToken = cookie.refreshToken?.value; // ✅ perhatikan ini
 
     if (!refreshToken) {
         return { error: "Refresh token is required" };
     }
 
-    await prisma.logins.deleteMany({ where: { refresh_token: refreshToken } });
+    await prisma.logins.deleteMany({
+        where: {
+            refresh_token: refreshToken, 
+        },
+    });
 
-    setCookie("refreshToken", "", { httpOnly: true, secure: true, path: "/", maxAge: 0 });
+    set.headers["Set-Cookie"] = `refreshToken=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax; Secure=${isSecure}`;
+
 
     return { message: "Logout successful" };
 };

@@ -1,21 +1,31 @@
-import { createTag, deleteTag, getTagById, getTags, updateTag } from "../models/tags.model";
+import prisma from "../config/db";
+import type { Tag } from "../models/tags.model";
 
 export const getAllTags = async () => {
-  return getTags();
+  return await prisma.tags.findMany();
 };
 
 export const getSingleTag = async ({ params }: { params: { id: string } }) => {
-  return getTagById(Number(params.id));
+  return await prisma.tags.findUnique({ where: { id: Number(params.id) } });
 };
 
-export const addTag = async ({ body }: { body: any }) => {
-  return createTag(body);
+// Tambah tag baru
+export const addTag = async ({ body }: { body: Tag }) => {
+  return await prisma.tags.create({ data: body });
 };
 
-export const modifyTag = async ({ params, body }: { params: { id: string }; body: any }) => {
-  return updateTag(Number(params.id), body);
+// Ubah tag berdasarkan ID
+export const modifyTag = async ({
+  params,
+  body,
+}: {
+  params: { id: string };
+  body: Partial<Tag>;
+}) => {
+  return await prisma.tags.update({ where: { id: Number(params.id) }, data: body });
 };
 
+// Hapus tag berdasarkan ID
 export const removeTag = async ({ params }: { params: { id: string } }) => {
-  return deleteTag(Number(params.id));
+  return await prisma.tags.delete({ where: { id: Number(params.id) } });
 };

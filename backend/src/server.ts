@@ -5,10 +5,15 @@ import { tagRoutes } from "./routes/tags.route";
 import { taskTagRoutes } from "./routes/tasktags.route";
 import { authRoutes } from "./routes/auth.route"; // Tambahkan ini
 import { cors } from "@elysiajs/cors";
+import { cookie } from "@elysiajs/cookie";
 
 
 const app = new Elysia()
-  .use(cors())
+.use(cors({
+  origin: "http://localhost:3000", // asal frontend kamu
+  credentials: true                // penting supaya cookie bisa ikut
+}))
+  .use(cookie())
   .use(userRoutes)
   .use(taskRoutes)
   .use(tagRoutes)
