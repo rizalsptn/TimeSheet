@@ -1,9 +1,21 @@
 // context/TaskContext.tsx
-import { createContext, useContext, useState } from "react";
+"use client";
 
-const TaskContext = createContext(null);
+import { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
 
-export const TaskProvider = ({ children }) => {
+
+type TaskContextType = {
+  searchTerm: string;
+  setSearchTerm: Dispatch<SetStateAction<string>>;
+  selectedTags: string[];
+  setSelectedTags: Dispatch<SetStateAction<string[]>>;
+};
+
+
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
+
+
+export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -14,4 +26,11 @@ export const TaskProvider = ({ children }) => {
   );
 };
 
-export const useTaskContext = () => useContext(TaskContext);
+
+export const useTaskContext = () => {
+  const context = useContext(TaskContext);
+  if (!context) {
+    throw new Error("useTaskContext must be used within a TaskProvider");
+  }
+  return context;
+};

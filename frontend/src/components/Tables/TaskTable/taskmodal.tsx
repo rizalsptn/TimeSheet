@@ -108,7 +108,6 @@ useEffect(() => {
 
   const handleUpdate = async () => {
     try {
-      // 1. Update data utama
       const res = await fetch(`http://localhost:3001/tasks/${taskId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -123,9 +122,7 @@ useEffect(() => {
       });
   
       if (!res.ok) throw new Error("Update data tugas gagal");
-  
-      // 2. Update tags
-      // Hapus tag sebelumnya
+
       const deleteRes = await fetch(`http://localhost:3001/tasktags/task/${taskId}`, {
         method: "DELETE",
         credentials: "include",
@@ -133,7 +130,6 @@ useEffect(() => {
   
       if (!deleteRes.ok) throw new Error("Gagal menghapus tag lama");
   
-      // Tambah tag baru
       const tagResults = await Promise.all(
         form.tag_ids.map((tagId) =>
           fetch("http://localhost:3001/tasktags/", {
@@ -148,7 +144,6 @@ useEffect(() => {
       const failedTag = tagResults.find((res) => !res.ok);
       if (failedTag) throw new Error("Gagal menambahkan tag baru");
   
-      // ✅ Semua berhasil
       showPopup({
         variant: "SUCCESS",
         title: "Berhasil",
@@ -207,8 +202,8 @@ useEffect(() => {
   if (!taskId || !task) return null;
 
   return createPortal(
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto relative">
         <div className="flex justify-between items-center border-b pb-2">
           <h2 className="text-lg font-semibold">Detail Tugas</h2>
           <button onClick={onClose}>

@@ -8,8 +8,9 @@ import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import { Providers } from "./providers";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
-import { AuthProvider }  from "@/context/AuthContext";
-import { PopupProvider} from "@/context/PopupContext";
+import { AuthProvider } from "@/context/AuthContext";
+import { PopupProvider } from "@/context/PopupContext";
+import { TaskProvider } from "@/context/TaskContext";
 import PopupManager from "@/components/Layouts/PopupManager";
 
 export const metadata: Metadata = {
@@ -28,9 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <Providers>
             <PopupProvider>
-            <NextTopLoader />
-            <LayoutWrapper>{children}</LayoutWrapper>
-            <PopupManager/>  
+              <TaskProvider>
+                <NextTopLoader />
+                <LayoutWrapper>{children}</LayoutWrapper>
+                <PopupManager />
+              </TaskProvider>
             </PopupProvider>
           </Providers>
         </AuthProvider>
